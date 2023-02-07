@@ -1,0 +1,652 @@
+<dashboard xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" theme="Microsoft Lync">
+  <layout type="fixed">
+    <window x="0%" y="0%" width="100%" height="34px">
+      <name>Title</name>
+      <table width="0px" />
+    </window>
+    <window x="0%" y="0%" width="100%" height="70%">
+      <name>Main</name>
+      <table width="0px" />
+    </window>
+    <window x="0%" y="70%" width="100%" height="30%">
+      <name>Profile_Emails_Sent</name>
+      <table width="900px">
+        <datafield name="TaskNumber" width="100px" />
+        <datafield name="ProfileName" width="400px" />
+        <datafield name="TriggerTime" width="200px" />
+        <datafield name="SentTime" width="200px" />
+      </table>
+    </window>
+  </layout>
+  <windows>
+    <htmlwindow>
+      <title visible="true">Dashboard Mailer Profile Settings</title>
+      <name>Main</name>
+      <presentation theme="StandardTotals" />
+      <html><![CDATA[
+         <style>
+            #dashboardmailer td, #globals td {
+               padding: 5px;
+            }
+            #all-profiles-table tr {
+               height: 100%;
+            }
+            #description {
+               margin-left: 5px;
+               padding-left: 3px;
+               width: 700px !important;
+               border: 1px solid #aaa;
+               white-space: pre-wrap;
+            }
+            #recepient {
+               width: 700px !important;
+            }
+            #dashboardmailer input, #dashboardmailer textarea, #globals input {
+               height: 2em;
+               color: #666;
+               width: 300px;
+            }
+            #all-profiles-table td {
+               vertical-align: middle;
+            }
+            #all-profiles-table thead {
+               display:     table-header-group;
+            }
+            #all-profiles-table tbody{
+               height:     300px; 
+               width:      100%;
+               overflow-y: auto;  
+               overflow-x: hidden;
+               display:    table-row-group;
+            }
+            .ui-dialog-titlebar {
+               display: inherit !important;
+               padding: 6px;
+            }
+            .ui-dialog-titlebar a {
+               display: none;
+            }
+            .ui-dialog-buttonset {
+               padding: 6px;
+            }
+            #globals .btn {
+               padding: 7px; margin-bottom: 2px;
+            }
+            #popup-dialog {
+               position: relative;
+               float: left;
+               padding: 20px;
+               max-height: 600px;
+            }
+            #dm-warning {width: 20px;}
+         </style>
+         <div id="globals">
+            <table>
+               <tr>
+                  <td style="width:400px;" align="right">SMTP Mail Server: </td>
+                  <td><input type="text" id="mail-server" name="mail-server"/></td>
+               </tr>
+               <tr>
+                  <td align="right">From Email: </td>
+                  <td id="mail-from"></td>
+               </tr>
+               <tr>
+                  <td align="right">Save Profiles On: </td>
+                  <td><input type="text" id="save-to" name="save-to"/></td>
+               </tr>
+               <tr>
+                  <td align="right"></td>
+                  <td style="text-align: right; padding-right: 15px;">
+                     <button onclick="$('#addoredit-profile').text('Add Profile');$('#dashboardmailer').dialog('open');" id="open-add-dialog" class="btn btn-primary">Add New Profile</button>
+                     <button onclick="deleteAllProfiles();getAllProfiles();" id="reload-all-profiles" class="btn btn-danger">Reload From Disk</button>
+                     <button onclick="saveProfilesToDisk();" id="save-all-profiles" class="btn btn-primary">Save Profiles To Disk</button>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <div id="dashboardmailer" title="Set Profile Properties">
+            <table style="margin-top: 10px;">
+               <tbody>
+                  <tr>
+                     <td style="width:200px;" align="right" class="required"><label for="profile">Profile: </label></td>
+                     <td><input type="text" id="profile" name="profile"/></td>
+                  </tr>
+                  <tr>
+                     <td align="right" class="required"><label for="recepient">Recepients: </label></td>
+                     <td><input type="text" id="recepient" name="recepient"/></td>
+                  </tr>
+                  <tr>
+                     <td align="right" class="required"><label for="description">Description: </label></td>
+                     <td><textarea type="text" id="description" name="description"/></textarea></td>
+                  </tr>
+                  <tr>
+                     <td align="right"><label for="dashboardurl">Dashboard URL: </label></td>
+                     <td>
+                        <input type="text" id="dashboardurl" name="dashboardurl" style="width: 660px;" />
+                        <button type="submit" id="adddashboard" class="btn btn-primary" style="padding: 2px 7px; margin-bottom: 2px;">Add</button>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="right"><label for="dashboardlist">List: </label></td>
+                     <td>
+                        <select id="dashboardlist" name="dashboardlist" size="5" style="width: 700px; margin-left: 5px;">
+                        </select>
+                        <br>
+                        <button type="submit" id="removedashboard" class="btn btn-primary" style="padding: 3px; margin-left: 595px; margin-top: 5px;">Remove Selected</button>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td align="right"><label for="dayofweek">Schedule: </label></td>
+                     <td>
+                        <select id="dayofweek" name="dayofweek" style="margin-left: 5px; height:2em;">
+                           <option value="EVERY">Every</option>
+                           <option value="DAY">Daily</option>
+                           <option value="WEEKDAYS">Weekdays</option>
+                           <option value="MONDAY">Monday</option>
+                           <option value="TUESDAY">Tuesday</option>
+                           <option value="WEDNESDAY">Wednesday</option>
+                           <option value="THURSDAY">Thursday</option>
+                           <option value="FRIDAY">Friday</option>
+                           <option value="SATURDAY">Saturday</option>
+                           <option value="SUNDAY">Sunday</option>
+                        </select>
+                        <span id="timeofday-span">
+                           <label for="timeofday"> at: </label>
+                           <select id="timeofday" name="timeofday" style="margin-left: 5px; height:2em;">
+                              <option value="00:00 00:30">00:00</option>
+                              <option value="01:00 01:30">01:00</option>
+                              <option value="02:00 02:30">02:00</option>
+                              <option value="03:00 03:30">03:00</option>
+                              <option value="04:00 04:30">04:00</option>
+                              <option value="05:00 05:30">05:00</option>
+                              <option value="06:00 06:30">06:00</option>
+                              <option value="07:00 07:30">07:00</option>
+                              <option value="08:00 08:30">08:00</option>
+                              <option value="09:00 09:30">09:00</option>
+                              <option value="10:00 10:30">10:00</option>
+                              <option value="11:00 11:30">11:00</option>
+                              <option value="12:00 12:30">12:00</option>
+                              <option value="13:00 13:30">13:00</option>
+                              <option value="14:00 14:30">14:00</option>
+                              <option value="15:00 15:30">15:00</option>
+                              <option value="16:00 16:30">16:00</option>
+                              <option value="17:00 17:30">17:00</option>
+                              <option value="18:00 18:30">18:00</option>
+                              <option value="19:00 19:30">19:00</option>
+                              <option value="20:00 20:30">20:00</option>
+                              <option value="21:00 21:30">21:00</option>
+                              <option value="22:00 22:30">22:00</option>
+                              <option value="23:00 23:30">23:00</option>
+                           </select>
+                        </span>
+                        <select id="hourfrequency" name="hourfrequency" style="margin-left: 5px; height:2em;">
+                           <option value= "1"> 1 hr</option>
+                           <option value= "2"> 2 hrs</option>
+                           <option value= "3"> 3 hrs</option>
+                           <option value= "4"> 4 hrs</option>
+                           <option value= "5"> 5 hrs</option>
+                           <option value= "6"> 6 hrs</option>
+                           <option value= "7"> 7 hrs</option>
+                           <option value= "8"> 8 hrs</option>
+                           <option value= "9"> 9 hrs</option>
+                           <option value="10">10 hrs</option>
+                           <option value="11">11 hrs</option>
+                           <option value="12">12 hrs</option>
+                           <option value="13">13 hrs</option>
+                           <option value="14">14 hrs</option>
+                           <option value="15">15 hrs</option>
+                           <option value="16">16 hrs</option>
+                           <option value="17">17 hrs</option>
+                           <option value="18">18 hrs</option>
+                           <option value="19">19 hrs</option>
+                           <option value="20">20 hrs</option>
+                           <option value="21">21 hrs</option>
+                           <option value="22">22 hrs</option>
+                           <option value="23">23 hrs</option>
+                        </select>
+                     </td>
+                  </tr>
+                  <tr>
+                     <td colspan="2" id="profile-not-valid" class="field-validation-error" style="text-align:center;"></td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+         <div id="all-profiles" style="width:99%; overflow-y: auto;">
+            <table id="all-profiles-table" class="Standard zebraTable">
+               <thead>
+                  <tr>
+                     <th class="ui-resizable" style="width:12%;">Profile Name</th>
+                     <th class="ui-resizable" style="width:12%;">Recepients</th>
+                     <th class="ui-resizable" style="width:12%;">Description</th>
+                     <th class="ui-resizable" style="width:12%;">Schedule</th>
+                     <th class="ui-resizable" style="width:38%;">Dashboards Included</th>
+                     <th class="ui-resizable" style="width:4%;">Edit</th>
+                     <th class="ui-resizable" style="width:6%;">Delete</th>
+                  </tr>
+               </thead>
+               <tbody></tbody>
+            </table>
+         </div>
+         
+         <span id="popup-dialog">
+            <table id="popup-text-table">
+               <tr><td>Getting Details ...</td></tr>
+            </table>
+         </span>
+         <script>
+            var urlBase = window.location.protocol.replace(/\:/g, "") + "://" + window.location.host,
+                mailerjson,
+                oldprofilename;
+            
+            function validateProfile(){
+               var profilename = $.trim($('#profile').val()),
+                   recepient = $.trim($('#recepient').val()),
+                   dashboards = [];
+               $("#dashboardlist option").each(function(){
+                  dashboards.push($(this).val());
+               });
+               return profilename != "" && recepient != "" && dashboards.length;
+            }
+            
+            function showhideOptions() {
+               if ($('#dayofweek').val() == 'EVERY') {
+                  console.log ('hide span');
+                  $('#timeofday-span').hide();
+                  $('#hourfrequency').show();
+               } else {
+                  $('#timeofday-span').show();
+                  $('#hourfrequency').hide();
+               }
+            }
+            
+            function getProfileJSON(){
+               var profilename = $.trim($('#profile').val()),
+                   recepient = $.trim($('#recepient').val()),
+                   description = $.trim($('#description').val()),
+                   dayofweek = $('#dayofweek').val(),
+                   timeofday = $('#timeofday').val(),
+                   hourfrequency = $('#hourfrequency').val(),
+                   dashboards = [],
+                   profile = {},
+                   json = {};
+               $("#dashboardlist option").each(function(){
+                  dashboards.push($(this).val());
+               });
+               profile.email = recepient;
+               profile.dashboards = dashboards;
+               profile.description = description;
+               profile.dayofweek = dayofweek;
+               profile.timeofday = timeofday;
+               profile.hourfrequency = hourfrequency;
+               json[profilename] = profile;
+               json.profilename = profilename;
+               return json;
+            }
+            
+            function getAllProfiles() {
+               $.ajax({
+                  url : urlBase + "/Prognosis/Administration/Config/DashboardMailer.json",
+                  cache: false,
+                  type: "GET",
+                  success: function (data) {
+                     mailerjson = data;
+                     console.log("API Url:" + this.url);
+                     console.log("Got all profiles, data: " + JSON.stringify(data));
+                     fillProfiles();
+                  },
+                  error: function (xhr, error) {
+                     console.log("Failed: " + error);
+                  }
+               });
+            }
+            
+            function profilesNotSynced() {
+               $('#save-all-profiles').append('<img title="changes not synced back to server yet." id="dm-warning" src="/dashboards/user/dm-warning.png"></img>');
+            }
+            
+            function addProfileLine(profilename){
+               var profile = mailerjson.dashboard_profiles[profilename];
+               var formatteddashboards = [];
+               $.each(profile.dashboards, function(i,url){ formatteddashboards.push(decodeURIComponent(url.replace(/.*\/Dashboard\//i,'')))});
+               var everyfrequency = profile.dayofweek != 'EVERY' ? 'Every ' + profile.dayofweek + ' at ' + profile.timeofday.substring(0,5) : 'Every ' + profile.hourfrequency + ' hrs' ;
+               $("#all-profiles-table").find('tbody')
+                  .append($('<tr>')
+                     .append($('<td class="profile-name" title="' + profilename + '">')
+                        .append(profilename)
+                     )
+                     .append($('<td title="' + profile.email + '">')
+                        .append(profile.email)
+                     )
+                     .append($('<td title="' + profile.description + '" style="white-space: pre-wrap;">')
+                        .append(profile.description)
+                     )
+                     .append($('<td title="' + everyfrequency + '">')
+                        .append(everyfrequency)
+                     )
+                     .append($('<td title="' + formatteddashboards.join('\n') + '">')
+                        .append(formatteddashboards.join('<br>'))
+                     )
+                     .append($('<td>')
+                        .append('<button type="submit" onclick="editProfile(\'' + profilename + '\');" class="edit-profile btn btn-primary" style="padding: 0px 5px; margin: 3px 0px;">Edit</button>')
+                     )
+                     .append($('<td>')
+                        .append('<button type="submit" onclick="deleteProfileConfirm(\'' + profilename + '\');" class="delete-profile btn btn-danger" style="padding: 0px 5px; margin: 3px 0px;">Delete</button>')
+                     )
+                  );
+            }
+            
+            function fillProfiles(){
+               $('#mail-server').val(mailerjson.mail_server);
+               $('#mail-from').text(mailerjson.mail_from);
+               $('#save-to').val(mailerjson.save_to);
+               $.each(mailerjson.dashboard_profiles, function(profilename){ addProfileLine(profilename); });
+               defaultnode = mailerjson.save_to;
+            }
+            
+            function resetProfileForm(){
+               $('#profile-not-valid').text('');
+               $('#profile').val('');
+               $('#recepient').val('');
+               $('#description').val('');
+               $('#dashboardurl').val('');
+               $('#dashboardlist')
+                  .find('option')
+                  .remove();
+               $("#dayofweek").val($("#dayofweek option:first").val());
+               $("#timeofday").val($("#timeofday option:first").val());
+               $("#hourfrequency").val($("#hourfrequency option:first").val());
+               showhideOptions();
+               
+            }
+            function formDialog(){
+               $( "#dashboardmailer" ).dialog({
+                  modal: true,
+                  height: 520,
+                  width: 1000,
+                  autoOpen: false,
+                 open: function() {
+                     // On open, hide the original submit button
+                     //$( this ).find( "[type=submit]" ).hide();
+                     if ($('#addoredit-profile').text() == "Add Profile") {
+                        resetProfileForm();
+                     }
+                 },
+                 buttons: [
+                     {
+                        text: "Add Profile",
+                        id: "addoredit-profile",
+                        class: "btn btn-primary",
+                        type: "submit",
+                        click: function(event){
+                           event.preventDefault();
+                           var valid = validateProfile();
+                           console.log('valid: ' + valid);
+                           if (!valid){
+                              $('#profile-not-valid').text('All fields are mandatory, missing field?');
+                              return;
+                           }
+                           if ($('#addoredit-profile').text() == "Edit Profile") {
+                              console.log ('Remove ' + oldprofilename)
+                              deleteProfile(oldprofilename);
+                           }
+                           var json = getProfileJSON();
+                           mailerjson.dashboard_profiles[json.profilename] = json[json.profilename];
+                           addProfileLine(json.profilename);
+                           console.log (JSON.stringify(mailerjson));
+                           $( this ).dialog( "close" );
+                        }
+                     },
+                     {
+                        text: "Cancel",
+                        class: "btn btn-info",
+                        click: function() {
+                           $( this ).dialog( "close" );
+                        }
+                     }
+                 ]
+               });
+            }
+            
+            function deleteAllProfiles(){
+               console.log ('Deleting all profiles');
+               mailerjson = {};
+               $("#all-profiles-table tbody").remove();
+               $("#all-profiles-table").append($('<tbody>'));
+            }
+            
+            function deleteProfile(profilename){
+               console.log ('Deleting ' + profilename);
+               delete mailerjson.dashboard_profiles[profilename];
+               $("td.profile-name").filter(function() {
+                   return $(this).text() == profilename;
+               }).parent().remove();
+            }
+            
+            function deleteProfileConfirm(profilename){
+               console.log ('Delete ' + profilename);
+               var del = confirm("Do you really want to delete " + profilename);
+               if (del) {
+                  deleteProfile(profilename);
+               }
+            }
+            
+            function editProfile(profilename){
+               var profile = mailerjson.dashboard_profiles[profilename];
+               oldprofilename = profilename;
+               console.log ('Edit ' + profilename + ": " + JSON.stringify(profile));
+               $('#profile').val(profilename);
+               $('#recepient').val(profile.email);
+               $('#description').val(profile.description);
+               $('#dashboardlist')
+                  .find('option')
+                  .remove();
+               $.each(profile.dashboards, function(i, dashboard){ 
+                  $('#dashboardlist').append($('<option/>', { 
+                     value: dashboard,
+                     text : dashboard
+                  }));
+               });
+               $('#dayofweek option[value="' + profile.dayofweek + '"]').prop('selected', true);
+               $('#timeofday option[value="' + profile.timeofday + '"]').prop('selected', true);
+               $('#hourfrequency option[value="' + profile.hourfrequency + '"]').prop('selected', true);
+               $('#addoredit-profile').text('Edit Profile');
+               showhideOptions();
+               $('#dashboardmailer').dialog('open');
+            }
+            
+            /* Automation Server Begins*/
+            
+            var defaultnode = null,
+                workflow = 'Dashboard Mailer Config',
+                workflowStartTime = null,
+                timer = null,
+                action = null,
+                popuphtml = '<tr><td>Saving Profiles ... </td></tr>',
+                theme = $(".selected.userskin .userskin-value").text(),
+                trbcolor = theme == "Charcoal" ? "#3C3C3C" : "#EFEFEF",
+                style = $('<style>#popup-text-table tr { border-bottom: 1px solid ' + trbcolor + '; }</style>');
+                
+            $('html > head').append(style);
+            $("#popup-dialog").dialog({
+               autoOpen: false,
+               modal: true,
+               width: 700,
+               resizable: false,
+               title: "Saving Profiles to Disk",
+               closeOnEscape: false,
+               close: function () {
+               },
+               buttons: [
+                  {
+                     text: 'OK',
+                     id: 'dlg-ok',
+                     click: function () {
+                        clearTimeout(timer);
+                        $(Prognosis.globals.idDimmedBackground).fadeOut(250);
+                        $(this).dialog("close");
+                        $("#popup-text-table tbody").html(popuphtml);
+                     },
+                  }
+               ]
+            });
+            function saveProfilesToDisk(){
+               $("#popup-text-table tbody").html(popuphtml);
+               $("#popup-dialog").dialog('open');
+               workflowStartTime = new Date().toISOString();
+               defaultnode = $('#save-to').val();
+               $('#dlg-ok').attr('disabled', true).addClass("ui-state-disabled");
+               callAutomation();
+               getWorkflowResult();
+            }
+            function callAutomation(){
+               mailerjson.mail_server  = $('#mail-server').val();
+               mailerjson.mail_from    = $('#mail-from').text();
+               mailerjson.save_to      = $('#save-to').val();
+               $.post("/Prognosis/Automation/RunNow",
+                  {  workflow: workflow, 
+                     defaultnode: defaultnode,
+                     mailerjson: encodeURIComponent(JSON.stringify(mailerjson))
+                  },
+                  function (data, status) {
+                     if (data.RunNowResult == 0) {
+                        //$("#popup-text-table tbody").html(popuphtml);
+                        //$("#popup-dialog").dialog('open');
+                        //getWorkflowResult();
+                     } else {
+                        var dialogMessage = '';
+                        if (data.RunNowResult === -3) {
+                           dialogMessage = '<br/><font color="red">Automation unavailable</font><br/><br/><br/>To use this feature, Prognosis must be licensed for Automation.';
+                        } else {
+                           dialogMessage = '<br/><font color="red">Automation service encountered errors</font><br/><br/><br/>Please check PrognosisAutomationLog.txt (on Prognosis web server) for details.';
+                        }
+                        $(Prognosis.globals.idProgressDlg).html(dialogMessage);
+                        $(Prognosis.globals.idDimmedBackground).fadeIn(250);
+                        $(Prognosis.globals.idProgressDlg).dialog({
+                           autoOpen: false,
+                           modal: true,
+                           width: 500,
+                           resizable: false,
+                           title: "Automation Error",
+                           closeOnEscape: false,
+                           buttons: {
+                              "OK": function () { $(Prognosis.globals.idDimmedBackground).fadeOut(250); $(this).dialog("close"); }
+                           }
+                        });
+                        $("#popup-dialog").dialog('close');
+                        clearTimeout(timer);
+                        $(Prognosis.globals.idProgressDlg).dialog('open');
+                     }
+                  });
+            }
+            function getWorkflowResult(){
+               $.ajax({
+                  url : urlBase + "/Prognosis/rest/v1/data/AutomationResults?DefaultNode=" + defaultnode + '&starttime=' + workflowStartTime + '&workflow=' + workflow,
+                  cache: false,
+                  type: "GET",
+                  success: function (data) {
+                     console.log("API Url:" + this.url);
+                     console.log("Got " + workflow + "Result data: " + JSON.stringify(data));
+                     
+                     var tbl_body = popuphtml;
+                     $.each(data.rows, function(i, row) {
+                        console.log ('Row: ' + row);
+                        $.each(this, function(v) {
+                           var tbl_row = "";
+                           tbl_row += "<td>"+row+"</td>";
+                           tbl_body += "<tr>"+tbl_row+"</tr>";
+                        });
+                     });
+                     $("#popup-text-table tbody").html(tbl_body);
+                     var wfcompleted = $.grep(data.rows, function (row) {
+                        return (/^Dashboard Mailer Configuration Completed/i.test(row));
+                     }).length;
+                     if (wfcompleted){
+                        console.log ('Done');
+                        clearTimeout(timer);
+                        $('#dlg-ok').removeAttr('disabled').removeClass("ui-state-disabled");
+                        $("#popup-text-table tbody")
+                           .append($('<tr>')
+                              .append($('<td style="color:green">')
+                                 .append('Done.')
+                              )
+                           );
+                     } else {
+                        timer = setTimeout(getWorkflowResult, 1000);
+                     }
+                  },
+                  error: function (xhr, error) {
+                     $('html, body').css({ 'cursor': 'default' });
+                     timer = setTimeout(getWorkflowResult, 1000);
+                  }
+               });
+            }
+            /* Automation Server Ends*/
+            $(function() {
+               $('#adddashboard').click(function(event){
+                  event.preventDefault();
+                  var url = $.trim($('#dashboardurl').val());
+                  if (url == "") { return; }
+                  $('#dashboardurl').val('');
+                  $('#dashboardlist').append($('<option/>', { 
+                     value: url,
+                     text : url
+                  }));
+               });
+               $('#removedashboard').click(function(event){
+                  $('#dashboardlist').find('option:selected').remove();
+               });
+               getAllProfiles();
+               formDialog();
+               $('#all-profiles').css('max-height', ($('#id_Main').height() - 200) + 'px');
+               showhideOptions();
+               $( "#dayofweek" ).change(function() {
+                  showhideOptions();
+               });
+            });
+         </script>
+      ]]></html>
+    </htmlwindow>
+    <htmlwindow>
+      <title visible="true">Dashboard Mailer</title>
+      <name>Title</name>
+      <presentation theme="DisplayTitle" />
+    </htmlwindow>
+    <table>
+      <title visible="true">Profile Emails Sent</title>
+      <name>Profile_Emails_Sent</name>
+      <presentation theme="Standard" />
+      <query>SELECT
+	META_INTERVAL,
+	TIMEZONE_DIFF,
+	ProblemNumber AS TaskNumber,
+	RuleName AS ProfileName,
+	OpenTime AS TriggerTime,
+	CloseTime AS SentTime
+FROM User_Custom_DashboardMailerEmailsSent
+^[Where_Interval]^
+^[Latest]^
+</query>
+      <colheadings visible="true" />
+      <datafields>
+        <datafield name="TaskNumber" visible="true">
+          <heading>Task</heading>
+          <description>FIELD: TaskNumber\nUnique number assigned to task.</description>
+        </datafield>
+        <datafield name="ProfileName" visible="true">
+          <heading>Profile</heading>
+          <description>FIELD: ProfileName\nEmail Profile used to send the snapshot.</description>
+        </datafield>
+        <datafield name="TriggerTime" visible="true" timeformat="ddMMyyyyHHmmss" precision="4" wrap="true">
+          <heading>Triggered</heading>
+          <description>FIELD: TriggerTime\nTime that the task was first triggered.</description>
+        </datafield>
+        <datafield name="SentTime" visible="true" timeformat="ddMMyyyyHHmmss" precision="4" wrap="true">
+          <heading>Sent</heading>
+          <description>FIELD: SentTime\nTime that the task was completed and email was sent.</description>
+        </datafield>
+      </datafields>
+      <refreshrate>10</refreshrate>
+    </table>
+  </windows>
+</dashboard>

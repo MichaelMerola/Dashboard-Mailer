@@ -1,0 +1,10 @@
+<dataSetCollection>
+   <dataSet>
+      <id>AutomationResults</id>
+      <query>SELECT WorkflowOutput FROM AutomationWorkflowOutput WHERE Workflow = @workflow AND Time &gt; @StartTime NODE @DefaultNode</query>
+   </dataSet>
+   <dataSet>
+      <id>CurrentNodeName</id>
+      <query>SELECT NodeName FROM PNODES</query>
+   </dataSet>
+</dataSetCollection>

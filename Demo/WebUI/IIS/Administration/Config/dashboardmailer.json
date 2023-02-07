@@ -1,0 +1,18 @@
+{
+   "mail_server": "mail.ir.com",
+   "mail_from": "Prognosis Automated Snapshot <snapshot@ir.com>",
+   "save_to": "\\<node>",
+   "dashboard_profiles": {
+      "Prognosis Status": {
+         "email": "demo@ir.com",
+         "dashboards": [
+            "https://<node>/Prognosis/Dashboard/DEMO"
+         ],
+         "description": "DEMO PROFILE",
+         "dayofweek": "DAY",
+         "timeofday": "12:00 12:30",
+         "hourfrequency": "1"
+      
+      }
+   }
+}

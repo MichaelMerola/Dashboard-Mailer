@@ -1,0 +1,19 @@
+{
+   "width" : 1920,
+   "height" : 1080,
+   "headless" : false,
+   "browserlog" : false,
+   "wait" : 500,
+   "waitafterlogin" : 5000,
+   "waitforgobutton" : 5000,
+   "waitafterload" : 30000,
+   "waitafterexport" : 5000,
+   "slowmo" : 250,
+   "subjectprefix" : "Snapshot - ",
+   "maxtimeoutinmin" : 10,
+   "browserlog" : true,
+   "creds" : {
+      "user" : null,
+      "password" : null
+   }
+}

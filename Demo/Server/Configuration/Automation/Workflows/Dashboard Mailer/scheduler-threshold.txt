@@ -1,0 +1,42 @@
+START
+THRESHOLD "Dashboard-Mailer"
+   NODE (
+      NODE "#CurrentNode"
+      END_NODE 
+   )    
+   CONDITION (
+      THRESHOLD_CONDITION "Prognosis Status"
+         ACTION (
+            ACTION 
+               LOG_TYPE               COMMAND
+               SEVERITY               WARNING
+               ON_EVENT_NUM           0
+               EVENT_TYPE             ON_EVENT
+               LOG_TEXT               "cd Automation/Workflows && runwa.bat \"Dashboard Mailer\" \"Prognosis Status\" > \"..\\..\\irdashboardmailer Prognosis Status.log\""
+               OFF_EVENT_NUM          0
+               OFF_TEXT               ""
+               USER                   "PROGNOSIS"
+               COMMAND_TYPE           SHELL
+               SHELL_SHARING          DEFAULT
+            END_ACTION 
+         )      
+         VIEW 
+            RECORD           "PNODES"
+            INTERVAL         1 MINUTES
+            NODE             (
+               NODE #CurrentNode
+               END_NODE 
+            )                
+            WHERE            (
+               ALL              
+            )                
+         END_VIEW         
+         AFTER 1 OCCURRENCES
+         LOGEVERY 1 HOURS
+         BETWEEN 12:00 12:30
+         OFF_TEXT ""
+         OFF_EVENT_NUM 0
+      END_THRESHOLD_CONDITION 
+      
+   )
+END_THRESHOLD

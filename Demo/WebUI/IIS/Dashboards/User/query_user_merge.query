@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<irquery>
+	<views>
+    <view name="User_Custom_DashboardMailerEmailsSent">
+      <query>SELECT
+	META.SERVERTIME AS META_SERVERTIME,
+	META.INTERVAL AS META_INTERVAL,
+	0 AS TIMEZONE_DIFF,
+	OpenTime,
+	ProblemNumber,
+	RuleName,
+	CloseTime,
+	AnalystName,
+	ObjectType,
+	SourceNode,
+	META.NODE
+FROM PrognosisAutomationProblemSummaryClosed
+OPTION HISTORICAL ODD 5000
+WHERE AnalystName CONTAINS 'Dashboard-Mailer'
+LIMIT EVERY NODE 500 BY CloseTime DESC
+NODE ALL
+ORDER BY OpenTime DESC
+EVERY 10 SECONDS
+</query>
+    </view>
+</views>
+</irquery>

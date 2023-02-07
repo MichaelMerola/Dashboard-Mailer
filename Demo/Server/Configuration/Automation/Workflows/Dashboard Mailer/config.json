@@ -1,0 +1,26 @@
+{
+   "subjectprefix" : "Snapshot - ",
+   "maxtimeoutinmin" : 10,
+   "mail_server": "mail.ir.com",
+   "mail_from": "Prognosis Automated Snapshot <snapshot@ir.com>",
+   "save_to": "\\<node>",
+   "dashboard_profiles": {
+	  "Prognosis Status": {
+		"email": "<email>@ir.com",
+		"description": "DEMO PROFILE",
+		"dayofweek": "DAY",
+		"timeofday": "12:00 12:30",
+		"hourfrequency": "1"
+	  }
+   },
+   "demodata" : {
+      "screenshots": [
+         "prognosis-dashboard-demo.png"
+      ],                            
+      "spreadsheets": [             
+         "Prognosis-Status-Demo.xlsx"
+      ],
+      "html": 
+         "<span style=\"font-weight:bold;\">TEST DEMO PROFILE</span><br><br>Dashboard : <a>Prognosis Status</a><br><br><img src=\"cid:prognosis-dashboard-demo.png\"/>"
+   }    
+}
