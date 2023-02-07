@@ -1,8 +1,9 @@
 # Dashboard Scheduler & Mailer
 
+Significant code files are located at _Dashboard-Mailer\Server\Configuration\Automation\Workflows\Dashboard Mailer_
+
 *   [Dashboard Scheduler & Mailer](#dashboard-mailer)
 *   [High Level Design](#hld)
-*   [Package Location](#package-location)
 *   [Package & Deployment](#deployment)
 *   [Troubleshooting](#troubleshooting) 
     
